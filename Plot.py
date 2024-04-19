@@ -6,118 +6,55 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patheffects import withStroke
 import geopandas as gpd
 
-with open("MPL_Blues.rgb", 'r') as f:
-    lines = f.readlines()
-    colorsOne = []
-    for line in lines:
-        if not line.strip() or line.startswith('#') or line.startswith('ncolors='):
-            continue
-        r, g, b = map(float, line.split())
-        colorsOne.append([r, g, b])
-
-    # Check if the number of colors read is equal to ncolors
-    if len(colorsOne) != 128:
-        raise ValueError("Number of colors read does not match ncolors=128")
-
-    # Convert to numpy array for colormap creation
-    colorsOne = np.array(colorsOne)
-
-
-    print("Number of colors read:", len(colorsOne))
-
-    with open("MPL_Reds.rgb", 'r') as f:
-        lines = f.readlines()
-        colorsTwo = []
-        for line in lines:
-            if not line.strip() or line.startswith('#') or line.startswith('ncolors='):
-                continue
-            r, g, b = map(float, line.split())
-            colorsTwo.append([r, g, b])
-
-        # Check if the number of colors read is equal to ncolors
-        if len(colorsTwo) != 128:
-            raise ValueError("Number of colors read does not match ncolors=128")
-
-        # Convert to numpy array for colormap creation
-        colorsTwo = np.array(colorsTwo)
-
-
-    print("Number of colors read:", len(colorsTwo))
-
-with open("MPL_BG.rgb", 'r') as f:
-    lines = f.readlines()
-    colorsThree = []
-    for line in lines:
-        if not line.strip() or line.startswith('#') or line.startswith('ncolors='):
-            continue
-        r, g, b = map(float, line.split())
-        colorsThree.append([r, g, b])
-
-    # Check if the number of colors read is equal to ncolors
-    if len(colorsThree) != 64:
-        raise ValueError("Number of colors read does not match ncolors=64")
-
-    # Convert to numpy array for colormap creation
-    colorsThree = np.array(colorsThree)
-
-
-
-    print("Number of colors read:", len(colorsThree))
-
-    with open("MPL_Br.rgb", 'r') as f:
-        lines = f.readlines()
-        colorsFour = []
-        for line in lines:
-            if not line.strip() or line.startswith('#') or line.startswith('ncolors='):
-                continue
-            r, g, b = map(float, line.split())
-            colorsFour.append([r, g, b])
-
-        # Check if the number of colors read is equal to ncolors
-        if len(colorsFour) != 64:
-            raise ValueError("Number of colors read does not match ncolors=64")
-
-        # Convert to numpy array for colormap creation
-        colorsFour = np.array(colorsFour)
-
-
-    print("Number of colors read:", len(colorsFour))
-
-
-
-
-
 
 sf = gpd.read_file('CONUS_CLIMATE_DIVISIONS.shp.zip')
 
+
+def importColors(colorFile):
+    with open(colorFile, 'r') as f:
+        lines = f.readlines()
+        colorX = []
+        for line in lines:
+            if not line.strip() or line.startswith('#') or line.startswith('ncolors='):
+                continue
+            r, g, b = map(float, line.split())
+            colorX.append([r, g, b])
+
+    return np.array(colorX)
 
 # Function to plot the degree days chart
 def plot_departure_maps(ddTable, date_range):
     for x in range(0, 4):
 
+
+
         if x == 0:
+            colorFile = "MPL_Blues.rgb"
             column_name = 'W_DD'
             title = "# of Heating Degree Days"
             cBarLabel = 'Heating Degree Days'
-            nColors = colorsOne
+            nColors = importColors(colorFile)
 
-        # elif x==2:
-        #     column_name = 'C_DD'
-        #     title = "# of Cooling Degree Days"
-        #     cBarLabel = 'Cooling Degree Days'
-        #     nColors = colorsTwo
+        elif x==2:
+            colorFile = "MPL_Reds.rgb"
+            column_name = 'C_DD'
+            title = "# of Cooling Degree Days"
+            cBarLabel = 'Cooling Degree Days'
+            nColors = importColors(colorFile)
 
-        elif x==1:
+        elif x == 1:
+            colorFile = "MPL_Br.rgb"
             column_name = 'W_Departure'
             title = "Depature from Heating Degree Days"
             cBarLabel = 'Departure Heating Degree Days'
-            nColors = colorsFour[::-1]
+            nColors = importColors(colorFile)[::-1]
 
-        elif x==3:
+        elif x == 3:
+            colorFile = "MPL_PR.rgb"
             column_name = 'C_Departure'
             title = "Depature from Cooling Degree Days"
             cBarLabel = 'Depature Cooling Degree Days'
-            nColors = colorsThree
+            nColors = importColors(colorFile)[::-1]
 
         # Creates a new table with only the columns that are needed
         newTable = ddTable[['cd', column_name]].copy()
@@ -130,6 +67,10 @@ def plot_departure_maps(ddTable, date_range):
 
         # Merges the newTable with the shapefile
         mergedSF = sf.merge(newTable, on="CLIMDIV", how="left")
+
+
+
+        ############################################################################################
 
         # Calculate vmin as the minimum value in the data or -200 (whichever is smaller)
         vmin = mergedSF[column_name].min()

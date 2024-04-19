@@ -3,7 +3,7 @@ import Plot
 import DataGrabber
 
 
-DateRange = '3', '1', '2024', '3', '31', '2024'
+DateRange = '7', '1', '2023', '7', '31', '2023'
 
 ddTable = DataGrabber.scraper(*DateRange)
 
